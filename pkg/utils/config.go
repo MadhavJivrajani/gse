@@ -19,18 +19,38 @@ package utils
 import (
 	"os"
 
-	"github.com/MadhavJivrajani/gse/pkg/core"
 	"gopkg.in/yaml.v2"
 )
 
+// Config represents the top level configuration file
+// that will be read.
+type Config struct {
+	// PathToBinary is the absolute path
+	// to the binary for which scheduler
+	// traces need to be collected.
+	PathToBinary string `yaml:"path,omitempty"`
+	// SchedTrace is the specific configuration
+	// for collecting scheduler traces.
+	SchedTrace SchedTraceConfig `yaml:"sched,omitempty"`
+	// TODO: add prometheus endpoint related config.
+}
+
+// SchedTraceConfig represents the config to configure
+// how the scheduler traces will be collected.
+type SchedTraceConfig struct {
+	// Interval is the frequency at which traces will be
+	// collected, and this value should be in milliseconds.
+	Interval uint64 `yaml:"interval"`
+}
+
 // ReadConfig reads the provided config into the Config
 // type and returns an error if any.
-func ReadConfig(path string) (*core.Config, error) {
+func ReadConfig(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	config := &core.Config{}
+	config := &Config{}
 	err = yaml.Unmarshal(data, config)
 	if err != nil {
 		return nil, err
