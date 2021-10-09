@@ -22,18 +22,21 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+
+	"github.com/MadhavJivrajani/gse/pkg/utils"
 )
 
 // RunFromConfig runs the target binary and serves the scheduler traces.
-func RunFromConfig(ctx context.Context, config *Config) error {
+func RunFromConfig(ctx context.Context, config *utils.Config) error {
+	schedTrace := NewSchedTrace()
 	for line := range streamExecutionOutput(ctx, config) {
-		fmt.Println(line)
+		schedTrace.UpdateSchedTraceFromRawTrace(line)
 	}
 
 	return nil
 }
 
-func streamExecutionOutput(ctx context.Context, config *Config) <-chan string {
+func streamExecutionOutput(ctx context.Context, config *utils.Config) <-chan string {
 	outChan := make(chan string, 1)
 	go func() {
 		cmd := exec.CommandContext(ctx, "sh", "-c", constructCommandFromConfig(config))
@@ -56,7 +59,7 @@ func streamExecutionOutput(ctx context.Context, config *Config) <-chan string {
 	return outChan
 }
 
-func constructCommandFromConfig(config *Config) string {
+func constructCommandFromConfig(config *utils.Config) string {
 	return fmt.Sprintf(
 		"GODEBUG=schedtrace=%d %s",
 		config.SchedTrace.Interval,
