@@ -23,14 +23,19 @@ import (
 	"log"
 	"os/exec"
 
+	"github.com/MadhavJivrajani/gse/pkg/exporter"
+	"github.com/MadhavJivrajani/gse/pkg/sched"
 	"github.com/MadhavJivrajani/gse/pkg/utils"
 )
 
 // RunFromConfig runs the target binary and serves the scheduler traces.
 func RunFromConfig(ctx context.Context, config *utils.Config) error {
-	schedTrace := NewSchedTrace()
-	for line := range streamExecutionOutput(ctx, config) {
-		schedTrace.UpdateSchedTraceFromRawTrace(line)
+	schedTrace := sched.NewSchedTrace()
+	schedMetrics := exporter.NewSchedulerMetrics()
+	for rawTrace := range streamExecutionOutput(ctx, config) {
+		log.Printf("got raw trace: %s", rawTrace)
+		schedTrace.UpdateSchedTraceFromRawTrace(rawTrace)
+		schedMetrics.UpdateMetricsFromTrace(schedTrace)
 	}
 
 	return nil

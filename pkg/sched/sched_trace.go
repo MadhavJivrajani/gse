@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package core
+package sched
 
 import (
 	"runtime"
@@ -47,8 +47,8 @@ func NewSchedTrace() *SchedTrace {
 }
 
 // UpdateSchedTraceFromRawTrace updates the SchedTrace in-place from a string based
-// scheduler trace and returns this updated SchedTrace.
-func (st *SchedTrace) UpdateSchedTraceFromRawTrace(rawTrace string) *SchedTrace {
+// scheduler trace.
+func (st *SchedTrace) UpdateSchedTraceFromRawTrace(rawTrace string) {
 	split := strings.Split(rawTrace, " ")
 
 	// this is a lot of hacky code to get the information out of a scheduler trace
@@ -65,8 +65,6 @@ func (st *SchedTrace) UpdateSchedTraceFromRawTrace(rawTrace string) *SchedTrace 
 	for i := 1; i < runtime.GOMAXPROCS(-1); i++ {
 		st.LocalRunQueueLengths[i] = toInt(split[8+i])
 	}
-
-	return st
 }
 
 // pair is of the form key=value, and value here is assumed to be an int.

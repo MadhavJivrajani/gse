@@ -19,9 +19,11 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/MadhavJivrajani/gse/pkg/core"
+	"github.com/MadhavJivrajani/gse/pkg/exporter"
 	"github.com/MadhavJivrajani/gse/pkg/utils"
 	"github.com/spf13/cobra"
 
@@ -34,17 +36,18 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "gse",
 	Short: "gse (Go Scheduler Exporter) exports scheduler traces to prometheus",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		file, err := cmd.Flags().GetString("file")
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 		config, err := utils.ReadConfig(file)
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 
-		return core.RunFromConfig(context.Background(), config)
+		go core.RunFromConfig(context.Background(), config)
+		exporter.ServeMetrics(config.Prometheus)
 	},
 }
 

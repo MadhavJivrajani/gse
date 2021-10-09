@@ -32,7 +32,9 @@ type Config struct {
 	// SchedTrace is the specific configuration
 	// for collecting scheduler traces.
 	SchedTrace SchedTraceConfig `yaml:"sched,omitempty"`
-	// TODO: add prometheus endpoint related config.
+	// Prometheus is the configuration for where the
+	// prometheus metrics should be served,
+	Prometheus PrometheusConfig `yaml:"prometheus,omitempty"`
 }
 
 // SchedTraceConfig represents the config to configure
@@ -40,7 +42,14 @@ type Config struct {
 type SchedTraceConfig struct {
 	// Interval is the frequency at which traces will be
 	// collected, and this value should be in milliseconds.
-	Interval uint64 `yaml:"interval"`
+	Interval uint64 `yaml:"interval,omitempty"`
+}
+
+// PrometheusConfig holds config related to what endpoint
+// and port the metrics should be served on.
+type PrometheusConfig struct {
+	Endpoint string `yaml:"endpoint,omitempty"`
+	Port     int    `yaml:"port,omitempty"`
 }
 
 // ReadConfig reads the provided config into the Config
