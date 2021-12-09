@@ -1,6 +1,6 @@
-path: /home/madhav/gocode/src/github.com/MadhavJivrajani/gophercon-2021/gophercon-2021
+path: "GOMAXPROCS=2 ./example/gophercon"
 prometheus:
   endpoint: metrics
   port: 8080
 sched:
-  interval: 1000
+  interval: 10
