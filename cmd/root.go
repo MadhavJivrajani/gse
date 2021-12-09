@@ -41,12 +41,16 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		if file == "" {
+			log.Fatal("please specify a valid config file")
+		}
 		config, err := utils.ReadConfig(file)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("error reading config file")
 		}
 
 		go core.RunFromConfig(context.Background(), config)
+		// TODO: add signal handling
 		exporter.ServeMetrics(config.Prometheus)
 	},
 }

@@ -1,4 +1,4 @@
-path: "GOMAXPROCS=2 ./example/gophercon"
+path: "./example/gophercon"
 prometheus:
   endpoint: metrics
   port: 8080
