@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"strings"
 
 	"github.com/MadhavJivrajani/gse/pkg/exporter"
 	"github.com/MadhavJivrajani/gse/pkg/sched"
@@ -32,8 +33,12 @@ import (
 func RunFromConfig(ctx context.Context, config *utils.Config) error {
 	schedTrace := sched.NewSchedTrace()
 	schedMetrics := exporter.NewSchedulerMetrics()
-	for rawTrace := range streamExecutionOutput(ctx, config) {
-		log.Printf("got raw trace: %s", rawTrace)
+	traceChan := streamExecutionOutput(ctx, config)
+	for {
+		rawTrace, ok := <-traceChan
+		if !ok {
+			break
+		}
 		schedTrace.UpdateSchedTraceFromRawTrace(rawTrace)
 		schedMetrics.UpdateMetricsFromTrace(schedTrace)
 	}
@@ -44,6 +49,7 @@ func RunFromConfig(ctx context.Context, config *utils.Config) error {
 func streamExecutionOutput(ctx context.Context, config *utils.Config) <-chan string {
 	outChan := make(chan string, 1)
 	go func() {
+		defer close(outChan)
 		cmd := exec.CommandContext(ctx, "sh", "-c", constructCommandFromConfig(config))
 		stdErrPipe, err := cmd.StderrPipe()
 		if err != nil {
@@ -57,7 +63,12 @@ func streamExecutionOutput(ctx context.Context, config *utils.Config) <-chan str
 		scanner := bufio.NewScanner(stdErrPipe)
 		scanner.Split(bufio.ScanLines)
 		for scanner.Scan() {
-			outChan <- scanner.Text()
+			trace := scanner.Text()
+			// avoid other output lines
+			if !strings.Contains(trace, "SCHED") {
+				continue
+			}
+			outChan <- trace
 		}
 	}()
 
