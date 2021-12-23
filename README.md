@@ -3,7 +3,7 @@
     <img src="https://github.com/ashleymcnamara/gophers/blob/master/GO_BUILD.png?raw=true" width="300" height="300">
 </p>
 
-`gse` stands for Go Scheduler Exporter and contains the source and setup required to run the demo that was done as part of the talk [Queues, Fairness, and The Go Scheduler](https://www.gophercon.com/agenda/session/596208). The slides for the talk can be found [here](https://speakerdeck.com/madhavjivrajani/queues-fairness-and-the-go-scheduler).
+`gse` stands for Go Scheduler Exporter and contains the source and setup required to run the demo that was done as part of the talk [Queues, Fairness, and The Go Scheduler](https://www.youtube.com/watch?v=wQpC99Xu1U4&list=PL2ntRZ1ySWBfulCVQD6EaU8c-GM56aUU7&index=10). The slides for the talk can be found [here](https://speakerdeck.com/madhavjivrajani/queues-fairness-and-the-go-scheduler).
 
 ## Working
 On a high level:
