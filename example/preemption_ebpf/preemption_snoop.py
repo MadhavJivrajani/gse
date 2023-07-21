@@ -6,6 +6,7 @@ from __future__ import print_function
 from bcc import BPF
 from bcc.utils import printb
 from datetime import datetime
+import sys
 
 debug = 0
 
@@ -76,16 +77,21 @@ kill_fnname = b.get_syscall_fnname("tgkill")
 b.attach_kprobe(event=kill_fnname, fn_name="syscall__tgkill")
 b.attach_kretprobe(event=kill_fnname, fn_name="do_ret_sys_tgkill")
 
-# header
-print("%-13s %-6s %-16s %-4s %-6s" % (
-    "TIME", "PID", "COMM", "SIG", "TID"))
+if len(sys.argv) > 1:
+    # header
+    print("%-13s %-6s %-16s %-4s %-6s" % (
+        "TIME", "PID", "COMM", "SIG", "TID"))
 
 # process event
 def print_event(cpu, data, size):
     event = b["events"].event(data)
-
-    printb(b"%-13s %-6d %-16s %-4d %-6d" % (datetime.utcnow().strftime('%H:%M:%S.%f')[:-3].encode("ascii"),
-        event.pid, event.comm, event.sig, event.tid))
+    if event.comm.decode('utf-8') != "lol":
+        return
+    if len(sys.argv) > 1:
+        printb(b"%-13s %-6d %-16s %-4d %-6d" % (datetime.utcnow().strftime('%H:%M:%S.%f')[:-3].encode("ascii"),
+            event.pid, event.comm, event.sig, event.tid))
+    else:
+        printb(b"%-6d" % event.tid)
 
 # loop with callback to print_event
 b["events"].open_perf_buffer(print_event)
