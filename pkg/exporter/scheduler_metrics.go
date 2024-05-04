@@ -32,6 +32,7 @@ type SchedulerMetrics struct {
 	SpinningThreads      prometheus.Gauge
 	IdleThreads          prometheus.Gauge
 	GlobalRunQueueLength prometheus.Gauge
+	NeedsSpinningThreads prometheus.Gauge
 	// the length of this slice will
 	// be equal to the value of GOMAXPORCS.
 	LocalRunQueueLengths []prometheus.Gauge
@@ -63,6 +64,12 @@ func NewSchedulerMetrics() *SchedulerMetrics {
 				Help: "Idle Threads",
 			},
 		),
+		NeedsSpinningThreads: promauto.NewGauge(
+			prometheus.GaugeOpts{
+				Name: "needs_spinning_threads",
+				Help: "Needs Spinning Threads",
+			},
+		),
 		GlobalRunQueueLength: promauto.NewGauge(
 			prometheus.GaugeOpts{
 				Name: "global_runqueue_length",
@@ -90,7 +97,9 @@ func (sm *SchedulerMetrics) UpdateMetricsFromTrace(st *sched.SchedTrace) {
 	sm.Threads.Set(float64(st.Threads))
 	sm.SpinningThreads.Set(float64(st.SpinningThreads))
 	sm.IdleThreads.Set(float64(st.IdleThreads))
+	sm.NeedsSpinningThreads.Set(float64(st.NeedsSpinningThreads))
 	sm.GlobalRunQueueLength.Set(float64(st.GlobalRunQueueLength))
+
 	for i := 0; i < len(sm.LocalRunQueueLengths); i++ {
 		sm.LocalRunQueueLengths[i].Set(float64(st.LocalRunQueueLengths[i]))
 	}

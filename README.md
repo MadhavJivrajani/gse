@@ -34,12 +34,14 @@ git clone https://github.com/MadhavJivrajani/gse.git && cd gse
 go build .
 # optional
 mv ./gse /usr/local/bin
+if permission denied then use export path instead 
+export PATH=$PATH:$PWD/gse
 ```
 ### Run `gse`
 An example program and config file can be found [here](./example).
 #### Compile the program
 ```sh
-go build -o gophercon main.go
+go build -o ./example/gophercon ./example/main.go
 ```
 #### Running `gse`
 Before actually running `gse`, make sure you have prometheus running whose config matches the `prometheus` part of the config provided to `gse`. The config I used and passed to a locally running `prometheus` was:
