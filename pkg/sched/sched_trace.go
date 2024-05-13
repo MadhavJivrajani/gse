@@ -32,7 +32,7 @@ type SchedTrace struct {
 	SpinningThreads      int
 	IdleThreads          int
 	GlobalRunQueueLength int
-	NeedsSpinningThreads int
+	NeedSpinningThreads  int
 	// the length of this slice will
 	// be equal to the value of GOMAXPORCS.
 	LocalRunQueueLengths []int
@@ -43,9 +43,10 @@ type SchedTrace struct {
 // of length equal to GOMAXPROCS.
 func NewSchedTrace() *SchedTrace {
 	n := runtime.GOMAXPROCS(-1)
-	log.Printf("GOMAXPROCS: %d", n)
+	log.Printf("GOMAXPROCS: %d\n", n)
 	return &SchedTrace{
 		LocalRunQueueLengths: make([]int, n),
+		Gomaxprocs:           n,
 	}
 }
 
@@ -56,11 +57,10 @@ func (st *SchedTrace) UpdateSchedTraceFromRawTrace(rawTrace string) {
 	// this is a lot of hacky code to get the information out of a scheduler trace
 	// line that looks as follows with GOMAXPROCS being 8:
 	// SCHED 0ms: gomaxprocs=8 idleprocs=6 threads=5 spinningthreads=1 needspinning=1 idlethreads=2 runqueue=0 [0 0 0 0 0 0 0 0]
-	st.Gomaxprocs = getValueFromKVPair(split[2])
 	st.Idleprocs = getValueFromKVPair(split[3])
 	st.Threads = getValueFromKVPair(split[4])
 	st.SpinningThreads = getValueFromKVPair(split[5])
-	st.NeedsSpinningThreads = getValueFromKVPair(split[6])
+	st.NeedSpinningThreads = getValueFromKVPair(split[6])
 	st.IdleThreads = getValueFromKVPair(split[7])
 	st.GlobalRunQueueLength = getValueFromKVPair(split[8])
 
