@@ -17,6 +17,7 @@ limitations under the License.
 package sched
 
 import (
+	"log"
 	"runtime"
 	"strconv"
 	"strings"
@@ -31,6 +32,7 @@ type SchedTrace struct {
 	SpinningThreads      int
 	IdleThreads          int
 	GlobalRunQueueLength int
+	NeedSpinningThreads  int
 	// the length of this slice will
 	// be equal to the value of GOMAXPORCS.
 	LocalRunQueueLengths []int
@@ -41,8 +43,10 @@ type SchedTrace struct {
 // of length equal to GOMAXPROCS.
 func NewSchedTrace() *SchedTrace {
 	n := runtime.GOMAXPROCS(-1)
+	log.Printf("GOMAXPROCS: %d\n", n)
 	return &SchedTrace{
 		LocalRunQueueLengths: make([]int, n),
+		Gomaxprocs:           n,
 	}
 }
 
@@ -50,20 +54,19 @@ func NewSchedTrace() *SchedTrace {
 // scheduler trace.
 func (st *SchedTrace) UpdateSchedTraceFromRawTrace(rawTrace string) {
 	split := strings.Split(rawTrace, " ")
-
 	// this is a lot of hacky code to get the information out of a scheduler trace
 	// line that looks as follows with GOMAXPROCS being 8:
-	// SCHED 0ms: gomaxprocs=8 idleprocs=6 threads=5 spinningthreads=1 idlethreads=2 runqueue=0 [0 0 0 0 0 0 0 0]
-	st.Gomaxprocs = getValueFromKVPair(split[2])
+	// SCHED 0ms: gomaxprocs=8 idleprocs=6 threads=5 spinningthreads=1 needspinning=1 idlethreads=2 runqueue=0 [0 0 0 0 0 0 0 0]
 	st.Idleprocs = getValueFromKVPair(split[3])
 	st.Threads = getValueFromKVPair(split[4])
 	st.SpinningThreads = getValueFromKVPair(split[5])
-	st.IdleThreads = getValueFromKVPair(split[6])
-	st.GlobalRunQueueLength = getValueFromKVPair(split[7])
+	st.NeedSpinningThreads = getValueFromKVPair(split[6])
+	st.IdleThreads = getValueFromKVPair(split[7])
+	st.GlobalRunQueueLength = getValueFromKVPair(split[8])
 
-	st.LocalRunQueueLengths[0] = toInt(split[8][1:])
-	for i := 1; i < runtime.GOMAXPROCS(-1); i++ {
-		st.LocalRunQueueLengths[i] = toInt(split[8+i])
+	st.LocalRunQueueLengths[0] = toInt(split[9][1:])
+	for i := 1; i < st.Gomaxprocs; i++ {
+		st.LocalRunQueueLengths[i] = toInt(split[9+i])
 	}
 }
 
